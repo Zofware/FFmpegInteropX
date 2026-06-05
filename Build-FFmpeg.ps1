@@ -14,6 +14,7 @@ param(
         Note. The PlatformToolset will be inferred from this value ('v141', 'v142'...)
     #>
     [version] $VcVersion = '14.3',
+    [string] $PlatformToolset = $null,
 
     [ValidateSet('UWP', 'Desktop')]
     [string] $WindowsTarget = 'UWP',
@@ -458,7 +459,7 @@ if (!$vsLatestPath){
 Write-Host "Visual Studio Installation folder: [$vsLatestPath]"
 
 # 14.16.27023 => v141
-$platformToolSet = "v$($VcVersion.Major)$("$($VcVersion.Minor)"[0])"
+$platformToolSet = If ($PlatformToolset) { $PlatformToolset } Else { "v$($VcVersion.Major)$("$($VcVersion.Minor)"[0])" }
 Write-Host "Platform Toolset: [$platformToolSet]"
 
 # Export full current PATH from environment into MSYS2

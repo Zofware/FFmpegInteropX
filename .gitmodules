@@ -6,7 +6,7 @@
 	url = https://github.com/ffmpeginteropx/bzip2.git
 [submodule "Libs/libiconv"]
 	path = Libs/libiconv
-	url = https://github.com/ffmpeginteropx/libiconv.git
+	url = https://github.com/Zofware/libiconv.git
 [submodule "Libs/libxml2"]
 	path = Libs/libxml2
 	url = https://github.com/ffmpeginteropx/libxml2.git
@@ -15,10 +15,10 @@
 	url = https://github.com/ffmpeginteropx/liblzma.git
 [submodule "Libs/PkgConfigFake"]
 	path = Libs/PkgConfigFake
-	url = https://github.com/ffmpeginteropx/PkgConfigFake.git
+	url = https://github.com/Zofware/PkgConfigFake.git
 [submodule "Libs/ffmpeg"]
 	path = Libs/ffmpeg
-	url = https://git.ffmpeg.org/ffmpeg.git
+	url = https://github.com/Zofware/FFmpeg.git
 [submodule "Libs/x265"]
 	path = Libs/x265
 	url = https://github.com/videolan/x265.git
