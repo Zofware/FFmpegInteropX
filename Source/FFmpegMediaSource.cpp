@@ -1097,7 +1097,7 @@ namespace winrt::FFmpegInteropX::implementation
         std::lock_guard lock(mutex);
         if (isClosed)
         {
-            OutputDebugString(L"\n SetFFmpegAudioFilters failed");
+            DebugMessage(L"\n SetFFmpegAudioFilters failed");
             return;
         }
         for (auto audioStream : audioStreams)

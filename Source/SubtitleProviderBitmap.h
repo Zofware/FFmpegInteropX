@@ -96,7 +96,7 @@ public:
                     av_freep(subtitle);
                     if (subtitle->num_rects > 0)
                     {
-                        OutputDebugString(L"Error: Invalid subtitle size received.");
+                        DebugMessage(L"Error: Invalid subtitle size received.");
                     }
                 }
             }
@@ -105,7 +105,7 @@ public:
         {
             avsubtitle_free(subtitle);
             av_freep(subtitle);
-            OutputDebugString(L"Failed to decode subtitle.");
+            DebugMessage(L"Failed to decode subtitle.");
         }
         return nullptr;
     }
@@ -151,7 +151,7 @@ private:
         }
         catch (...)
         {
-            OutputDebugString(L"Failed to render image cue.");
+            DebugMessage(L"Failed to render image cue.");
         }
     }
 
@@ -168,7 +168,7 @@ private:
         }
         catch (...)
         {
-            OutputDebugString(L"Failed to clear image cue.");
+            DebugMessage(L"Failed to clear image cue.");
         }
     }
 
@@ -205,7 +205,7 @@ private:
                             }
                             else
                             {
-                                OutputDebugString(L"Error: Illegal subtitle color.");
+                                DebugMessage(L"Error: Illegal subtitle color.");
                             }
                         }
                     }
@@ -219,7 +219,7 @@ private:
         }
         else if (subtitle->num_rects > 0)
         {
-            OutputDebugString(L"Error: Invalid subtitle size received.");
+            DebugMessage(L"Error: Invalid subtitle size received.");
         }
     }
 
@@ -301,7 +301,7 @@ private:
 
             if (subtitleWidth == 0 && subtitleHeight == 0)
             {
-                OutputDebugString(L"Warning: No subtitle size received. Assuming equal to video size.\n");
+                DebugMessage(L"Warning: No subtitle size received. Assuming equal to video size.\n");
                 subtitleWidth = videoWidth;
                 subtitleHeight = videoHeight;
             }

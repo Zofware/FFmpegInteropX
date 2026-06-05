@@ -84,7 +84,7 @@ extern "C"
 #if !_DEBUG
 #define DebugMessage(x)
 #else
-#define DebugMessage(x) OutputDebugString(x)
+#define DebugMessage(x) do { OutputDebugString(L"FFmpegInteropX: "); OutputDebugString(x); } while(0)
 #endif
 
 template<class T>

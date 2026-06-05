@@ -737,11 +737,11 @@ void UncompressedVideoSampleProvider::CheckFrameSize(AVFrame* avFrame)
     }
     else if (hasFormatChanged)
     {
-        OutputDebugStringW(L"Video Frame Size changed!\r\n");
+        DebugMessage(L"Video Frame Size changed!\r\n");
 
         auto streamDescriptor = VideoDescriptor();
         if (streamDescriptor) {
-            OutputDebugStringW(L"Perform dynamic format change.\r\n");
+            DebugMessage(L"Perform dynamic format change.\r\n");
             auto encProp = streamDescriptor.EncodingProperties();
             MediaPropertySet encodingProperties{ encProp.Properties() };
 

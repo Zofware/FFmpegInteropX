@@ -203,7 +203,7 @@ public:
         }
         catch (...)
         {
-            OutputDebugString(L"Failed to create subtitle cue.");
+            DebugMessage(L"Failed to create subtitle cue.");
         }
         av_packet_free(&packet);
     }
@@ -251,7 +251,7 @@ private:
         }
         catch (...)
         {
-            OutputDebugString(L"Failed to add subtitle cue.");
+            DebugMessage(L"Failed to add subtitle cue.");
         }
     }
 
@@ -273,7 +273,7 @@ private:
         }
         catch (...)
         {
-            OutputDebugString(L"Failed to add subtitle cue.");
+            DebugMessage(L"Failed to add subtitle cue.");
         }
     }
 
@@ -394,7 +394,7 @@ private:
     {
         UNREFERENCED_PARAMETER(sender);
         UNREFERENCED_PARAMETER(args);
-        OutputDebugString(L"Subtitle track error.");
+        DebugMessage(L"Subtitle track error.");
     }
 
 public:
