@@ -24,6 +24,10 @@
   <PropertyGroup>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <CsWinRTGenerateAotProjection>true</CsWinRTGenerateAotProjection>
+  </PropertyGroup>
   
   <PropertyGroup>
     <DefaultItemExcludes>**\*;*.*</DefaultItemExcludes>

@@ -22,7 +22,7 @@ param(
         10.0.17763.0
         10.0.18362.0
     #>
-    [version] $WindowsTargetPlatformVersion = '10.0.22000.0',
+    [version] $WindowsTargetPlatformVersion = '10.0.26100.0',
 
     [ValidateSet('UWP', 'Desktop')]
     [string] $WindowsTarget = 'UWP',
@@ -245,7 +245,7 @@ else
 if ($success -and $NugetPackageVersion)
 {
     nuget pack .\Build\FFmpegInteropX.$WindowsTarget.Lib.nuspec `
-        -Properties "id=FFmpegInteropX.$WindowsTarget.Lib;repositoryUrl=$FFmpegInteropXUrl;repositoryBranch=$FFmpegInteropXBranch;repositoryCommit=$FFmpegInteropXCommit;winsdk=$WindowsTargetPlatformVersion;NoWarn=NU5128" `
+        -Properties "id=FFmpegInteropX.$WindowsTarget.Lib;configuration=$Configuration;repositoryUrl=$FFmpegInteropXUrl;repositoryBranch=$FFmpegInteropXBranch;repositoryCommit=$FFmpegInteropXCommit;winsdk=$WindowsTargetPlatformVersion;NoWarn=NU5128" `
         -Version $NugetPackageVersion `
         -Symbols -SymbolPackageFormat symbols.nupkg `
         -OutputDirectory "Output\NuGet"

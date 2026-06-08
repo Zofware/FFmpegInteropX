@@ -20,9 +20,8 @@ public:
         AVFormatContext* avFormatCtx,
         AVCodecContext* avCodecCtx,
         MediaSourceConfig const& config,
-        int index,
-        DispatcherQueue const& dispatcher)
-        : SubtitleProvider(reader, avFormatCtx, avCodecCtx, config, index, TimedMetadataKind::ImageSubtitle, dispatcher)
+        int index)
+        : SubtitleProvider(reader, avFormatCtx, avCodecCtx, config, index, TimedMetadataKind::ImageSubtitle)
     {
     }
 
@@ -132,6 +131,7 @@ private:
 
     void OnCueEntered(TimedMetadataTrack sender, MediaCueEventArgs args)
     {
+        UNREFERENCED_PARAMETER(sender);
         std::lock_guard lock(mutex);
         try
         {
@@ -157,6 +157,7 @@ private:
 
     void OnCueExited(TimedMetadataTrack sender, MediaCueEventArgs args)
     {
+        UNREFERENCED_PARAMETER(sender);
         std::lock_guard lock(mutex);
         try
         {
