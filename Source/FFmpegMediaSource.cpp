@@ -36,11 +36,6 @@ namespace winrt::FFmpegInteropX::implementation
     using namespace Windows::Storage::Streams;
     using namespace Windows::Media::Playback;
 
-    // Static functions passed to FFmpeg
-    static int FileStreamRead(void* ptr, uint8_t* buf, int bufSize);
-    static int64_t FileStreamSeek(void* ptr, int64_t pos, int whence);
-    static int IsShuttingDown(void* ptr);
-
     // Flag for ffmpeg global setup
     static bool isRegistered = false;
     std::mutex isRegisteredMutex;
@@ -116,6 +111,28 @@ namespace winrt::FFmpegInteropX::implementation
         return interopMSS;
     }
 
+    static std::string FormatAvError(const char* prefix, int errnum)
+    {
+        // These statements are cascaded instead of combined to aid debugging and setting breakpoints.
+        char errorString[1024];
+        if (av_strerror(errnum, errorString, sizeof(errorString)) < 0)
+        {
+            if (0 != strerror_s(errorString, AVUNERROR(errnum)))
+            {
+                if (FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, AVUNERROR(errnum), 0, errorString, sizeof(errorString), nullptr) == 0)
+                {
+                    strcpy_s(errorString, "Unknown error");
+                }
+            }
+        }
+
+        char errorDescription[1024];
+        _snprintf_s(errorDescription, _TRUNCATE, "%s (%s: %d)", errorString, prefix, errnum);
+
+        return std::string(errorDescription);
+    }
+
+
     HRESULT FFmpegMediaSource::CreateMediaStreamSource(IRandomAccessStream const& stream)
     {
         HRESULT hr = S_OK;
@@ -124,13 +141,14 @@ namespace winrt::FFmpegInteropX::implementation
             hr = E_INVALIDARG;
         }
 
+        fileRandomAccessStream = stream;
+
         if (SUCCEEDED(hr))
         {
             // Convert asynchronous IRandomAccessStream to synchronous IStream. This API requires shcore.h and shcore.lib
             //
             //
             hr = CreateStreamOverRandomAccessStream(reinterpret_cast<::IUnknown*>(winrt::get_abi(stream)), IID_PPV_ARGS(&fileStreamData));
-
         }
 
         unsigned char* fileStreamBuffer = NULL;
@@ -190,8 +208,11 @@ namespace winrt::FFmpegInteropX::implementation
             avFormatCtx->flags |= AVFMT_FLAG_CUSTOM_IO;
             // Open media file using custom IO setup above instead of using file name. Opening a file using file name will invoke fopen C API call that only have
             // access within the app installation directory and appdata folder. Custom IO allows access to file selected using FilePicker dialog.
-            if (avformat_open_input(&avFormatCtx, "", NULL, &avDict) < 0)
+            int result = 0;
+            if ((result = avformat_open_input(&avFormatCtx, "", NULL, &avDict)) < 0)
             {
+                auto s = FormatAvError("", result);
+
                 hr = E_FAIL; // Error opening file
             }
 
@@ -2216,18 +2237,13 @@ namespace winrt::FFmpegInteropX::implementation
         if (sample && config->General().AutoExtendDuration())
         {
             auto sampleEnd = sample.Timestamp() + sample.Duration();
-            if (TimeSpan::zero() < mediaDuration && (mediaDuration < sampleEnd ||
-                (lastDurationExtension && (mediaDuration - sampleEnd).count() < 5000000)))
+            if (sampleEnd > mediaDuration)
             {
-                auto extension = min(lastDurationExtension + 1, 5);
-
-                mediaDuration += TimeSpan{ extension * 10000000 };
+                mediaDuration = sampleEnd;
                 if (auto mss = mssWeak.get())
                 {
                     mss.Duration(mediaDuration);
                 }
-
-                lastDurationExtension = extension;
             }
         }
     }
@@ -2411,9 +2427,43 @@ namespace winrt::FFmpegInteropX::implementation
     }
 
     // Static functions passed to FFmpeg
-    static int FileStreamRead(void* ptr, uint8_t* buf, int bufSize)
+    int FFmpegMediaSource::FileStreamRead(void* ptr, uint8_t* buf, int bufSize)
     {
         FFmpegMediaSource* mss = reinterpret_cast<FFmpegMediaSource*>(ptr);
+
+        // Update the IStream wrapper to account for any ongoing writes to the random access stream.
+        if (mss->fileRandomAccessStream != nullptr && mss->fileStreamData != nullptr)
+        {
+            STATSTG status;
+            if (!FAILED(mss->fileStreamData->Stat(&status, STATFLAG_NONAME)))
+            {
+                auto oldSize = (uint64_t)status.cbSize.QuadPart;
+                auto newSize = mss->fileRandomAccessStream.Size();
+                if (newSize != oldSize)
+                {
+                    ULARGE_INTEGER uliPos{};
+                    if (!FAILED(mss->fileStreamData->Seek({ 0 }, STREAM_SEEK_CUR, &uliPos)))
+                    {
+                        if (!FAILED(CreateStreamOverRandomAccessStream(reinterpret_cast<::IUnknown*>(winrt::get_abi(mss->fileRandomAccessStream)), IID_PPV_ARGS(&mss->fileStreamData))))
+                        {
+                            LARGE_INTEGER liPos{};
+                            liPos.QuadPart = uliPos.QuadPart;
+                            mss->fileStreamData->Seek(liPos, STREAM_SEEK_SET, nullptr);
+                            std::wstring output = L"File size changed from " + std::to_wstring(oldSize) + L" to " + std::to_wstring(newSize) + L"\n";
+                            DebugMessage(output.c_str());
+
+                            if (auto mssStrong = mss->mssWeak.get())
+                            {
+                                // the stream is growing so assume it is live
+                                mssStrong.CanSeek(true);
+                                mssStrong.IsLive(true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         ULONG bytesRead = 0;
         HRESULT hr = mss->fileStreamData->Read(buf, bufSize, &bytesRead);
 
@@ -2482,7 +2532,7 @@ namespace winrt::FFmpegInteropX::implementation
     }
 
     // Static function to seek in file stream. Credit to Philipp Sch http://www.codeproject.com/Tips/489450/Creating-Custom-FFmpeg-IO-Context
-    static int64_t FileStreamSeek(void* ptr, int64_t pos, int whence)
+    int64_t FFmpegMediaSource::FileStreamSeek(void* ptr, int64_t pos, int whence)
     {
         FFmpegMediaSource* mss = reinterpret_cast<FFmpegMediaSource*>(ptr);
         if (whence == AVSEEK_SIZE)
@@ -2510,7 +2560,7 @@ namespace winrt::FFmpegInteropX::implementation
         }
     }
 
-    static int IsShuttingDown(void* ptr)
+    int FFmpegMediaSource::IsShuttingDown(void* ptr)
     {
         FFmpegMediaSource* mss = reinterpret_cast<FFmpegMediaSource*>(ptr);
         if (mss->isShuttingDown)

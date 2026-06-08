@@ -258,6 +258,7 @@ namespace winrt::FFmpegInteropX::implementation
         AVDictionary* avDict = nullptr;
         AVIOContext* avIOCtx = nullptr;
         AVFormatContext* avFormatCtx = nullptr;
+        IRandomAccessStream fileRandomAccessStream;
         winrt::com_ptr<IStream> fileStreamData = { nullptr };
         TextEncodingDetect::Encoding streamEncoding = TextEncodingDetect::None;
         bool streamEncodingChecked = false;
@@ -323,8 +324,6 @@ namespace winrt::FFmpegInteropX::implementation
         bool isFirstSeek;
         bool isFirstSeekAfterStreamSwitch = false;
 
-        int lastDurationExtension = 0;
-
         bool isClosed = false;
 
         TimeSpan currentPosition{ 0 };
@@ -332,6 +331,11 @@ namespace winrt::FFmpegInteropX::implementation
         TimeSpan lastSeek{ 0 };
 
         void OnPositionChanged(MediaPlaybackSession const& sender, IInspectable const& args);
+
+        // Static functions passed to FFmpeg
+        static int FileStreamRead(void* ptr, uint8_t* buf, int bufSize);
+        static int64_t FileStreamSeek(void* ptr, int64_t pos, int whence);
+        static int IsShuttingDown(void* ptr);
     };
 }
 namespace winrt::FFmpegInteropX::factory_implementation

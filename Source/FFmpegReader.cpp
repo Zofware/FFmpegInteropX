@@ -533,8 +533,7 @@ int FFmpegReader::ReadPacket()
     {
         if (readResult == AVERROR_EOF || (avFormatCtx->pb && avFormatCtx->pb->eof_reached))
         {
-            DebugMessage(L"End of stream reached. Stop reading packets.\n");
-            isEof = true;
+            DebugMessage(L"End of stream reached. Retrying in case stream grows...\n");
         }
         else if (errorCount++ <= config.General().SkipErrors())
         {
