@@ -2761,7 +2761,7 @@ namespace winrt::FFmpegInteropX::implementation
 
 
     // Static functions passed to FFmpeg
-    static int FFmpegMediaSource::InputStreamRead(void* ptr, uint8_t* buf, int bufSize)
+    int FFmpegMediaSource::InputStreamRead(void* ptr, uint8_t* buf, int bufSize)
     {
         FFmpegMediaSource* mss = reinterpret_cast<FFmpegMediaSource*>(ptr);
         ULONG bytesRead = 0;

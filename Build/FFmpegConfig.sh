@@ -43,6 +43,7 @@ configureArgs="\
     --enable-hwaccels \
     --enable-d3d11va \
     --disable-dxva2 \
+    --disable-filter=gfxcapture \
     --${gpl}-gpl \
     --${gpl}-version3 \
     --target-os=win32 \
@@ -73,7 +74,7 @@ ldflags=""
 
 if [ "$variant" == "UWP" ]; then
 
-    ldflags="$ldflags -APPCONTAINER WindowsApp.lib"
+    ldflags="$ldflags -NODEFAULTLIB:libcmt -APPCONTAINER WindowsApp.lib"
 
     cflags="\
         $cflags \
@@ -84,7 +85,7 @@ fi
 
 if [ "$variant" == "Desktop" ]; then
 
-    ldflags="$ldflags -APPCONTAINER:NO -MACHINE:$platform Ws2_32.lib Advapi32.lib User32.lib"
+    ldflags="$ldflags -NODEFAULTLIB:libcmt -APPCONTAINER:NO -MACHINE:$platform Ws2_32.lib Advapi32.lib User32.lib"
 
     if [ "$sharedOrStatic" = "shared" ]; then
         cflags="$cflags -D_WINDLL"

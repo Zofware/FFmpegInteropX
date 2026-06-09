@@ -14,7 +14,7 @@
     <ConfigType>Debug</ConfigType>
   </PropertyGroup>
   <PropertyGroup>
-    <FFmpegPackageVersion Condition="'$(FFmpegPackageVersion)'==''">8.0.0</FFmpegPackageVersion>
+    <FFmpegPackageVersion Condition="'$(FFmpegPackageVersion)'==''">8.1.1</FFmpegPackageVersion>
     <FFmpegPackageIdBase Condition="'$(FFmpegPackageIdBase)'==''">FFmpegInteropX</FFmpegPackageIdBase>
     <FFmpegPackageIdPlatform Condition="'$(FFmpegPackageIdPlatform)'=='' AND '$(AppType)'=='Win32'">Desktop</FFmpegPackageIdPlatform>
     <FFmpegPackageIdPlatform Condition="'$(FFmpegPackageIdPlatform)'=='' AND '$(AppType)'=='UWP'">UWP</FFmpegPackageIdPlatform>
