@@ -242,7 +242,7 @@ namespace MediaPlayerCS
             currentFile = file;
 
             // Open StorageFile as IRandomAccessStream to be passed to FFmpegMediaSource
-            IRandomAccessStream readStream = await file.OpenAsync(FileAccessMode.Read);
+            IRandomAccessStream readStream = await file.OpenAsync(FileAccessMode.Read, StorageOpenOptions.AllowReadersAndWriters);
 
             try
             {
