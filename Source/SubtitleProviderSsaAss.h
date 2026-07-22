@@ -487,7 +487,7 @@ public:
                                 catch (...)
                                 {
                                     std::wstring output = L"Failed to parse tag: " + tag + L"\r\n";
-                                    OutputDebugString(output.c_str());
+                                    DebugMessage(output.c_str());
                                 }
                             }
 
@@ -706,7 +706,7 @@ public:
         }
         else if (result <= 0)
         {
-            OutputDebugString(L"Failed to decode subtitle.\r\n");
+            DebugMessage(L"Failed to decode subtitle.\r\n");
         }
 
         return nullptr;

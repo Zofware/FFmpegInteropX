@@ -160,12 +160,12 @@ HRESULT UncompressedAudioSampleProvider::CheckFormatChanged(AVSampleFormat forma
     bool hasFormatChanged = format != inSampleFormat || av_channel_layout_compare(&inChannelLayout, &channelLayout) || sampleRate != inSampleRate;
     if (hasFormatChanged)
     {
-        OutputDebugStringW(L"Audio Format changed!\r\n");
+        DebugMessage(L"Audio Format changed!\r\n");
 
         auto streamDescriptor = AudioDescriptor();
         if (streamDescriptor)
         {
-            OutputDebugStringW(L"Trying dynamic format change.\r\n");
+            DebugMessage(L"Trying dynamic format change.\r\n");
             auto encProp = streamDescriptor.EncodingProperties();
             SetMediaEncodingProperties(format, channelLayout, sampleRate, encProp);
         }
@@ -186,7 +186,7 @@ HRESULT UncompressedAudioSampleProvider::UpdateResampler()
     useResampler = av_channel_layout_compare(&inChannelLayout, &outChannelLayout) || inSampleRate != outSampleRate || inSampleFormat != outSampleFormat;
     if (useResampler)
     {
-        OutputDebugStringW(L"Using audio resampler.\r\n");
+        DebugMessage(L"Using audio resampler.\r\n");
 
         // Set up resampler to convert to output format and channel layout.
         hr = swr_alloc_set_opts2(
@@ -216,7 +216,7 @@ HRESULT UncompressedAudioSampleProvider::UpdateResampler()
     }
     else
     {
-        OutputDebugStringW(L"Not using audio resampler.\r\n");
+        DebugMessage(L"Not using audio resampler.\r\n");
     }
 
     // force update next time if there was an error
