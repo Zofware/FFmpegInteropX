@@ -1836,6 +1836,15 @@ namespace winrt::FFmpegInteropX::implementation
         return mediaDuration;
     }
 
+    void FFmpegMediaSource::Duration(TimeSpan const& value)
+    {
+        mediaDuration = value;
+        if (auto mss = mssWeak.get())
+        {
+            mss.Duration(mediaDuration);
+        }
+    }
+
     FFmpegInteropX::VideoStreamInfo FFmpegMediaSource::CurrentVideoStream()
     {
         std::lock_guard lock(mutex);
@@ -2667,33 +2676,30 @@ namespace winrt::FFmpegInteropX::implementation
         currentPosition = sender.Position();
     }
 
-    // Static functions passed to FFmpeg
-    int FFmpegMediaSource::FileStreamRead(void* ptr, uint8_t* buf, int bufSize)
+    // Update the IStream wrapper to account for any ongoing writes to the random access stream.
+    void FFmpegMediaSource::UpdateFileStreamSize()
     {
-        FFmpegMediaSource* mss = reinterpret_cast<FFmpegMediaSource*>(ptr);
-
-        // Update the IStream wrapper to account for any ongoing writes to the random access stream.
-        if (mss->fileRandomAccessStream != nullptr && mss->fileStreamData != nullptr)
+        if (this->fileRandomAccessStream != nullptr && this->fileStreamData != nullptr)
         {
             STATSTG status;
-            if (!FAILED(mss->fileStreamData->Stat(&status, STATFLAG_NONAME)))
+            if (!FAILED(this->fileStreamData->Stat(&status, STATFLAG_NONAME)))
             {
                 auto oldSize = (uint64_t)status.cbSize.QuadPart;
-                auto newSize = mss->fileRandomAccessStream.Size();
+                auto newSize = this->fileRandomAccessStream.Size();
                 if (newSize != oldSize)
                 {
                     ULARGE_INTEGER uliPos{};
-                    if (!FAILED(mss->fileStreamData->Seek({ 0 }, STREAM_SEEK_CUR, &uliPos)))
+                    if (!FAILED(this->fileStreamData->Seek({ 0 }, STREAM_SEEK_CUR, &uliPos)))
                     {
-                        if (!FAILED(CreateStreamOverRandomAccessStream(reinterpret_cast<::IUnknown*>(winrt::get_abi(mss->fileRandomAccessStream)), IID_PPV_ARGS(&mss->fileStreamData))))
+                        if (!FAILED(CreateStreamOverRandomAccessStream(reinterpret_cast<::IUnknown*>(winrt::get_abi(this->fileRandomAccessStream)), IID_PPV_ARGS(&this->fileStreamData))))
                         {
                             LARGE_INTEGER liPos{};
                             liPos.QuadPart = uliPos.QuadPart;
-                            mss->fileStreamData->Seek(liPos, STREAM_SEEK_SET, nullptr);
+                            this->fileStreamData->Seek(liPos, STREAM_SEEK_SET, nullptr);
                             std::wstring output = L"File size changed from " + std::to_wstring(oldSize) + L" to " + std::to_wstring(newSize) + L"\n";
                             DebugMessage(output.c_str());
 
-                            if (auto mssStrong = mss->mssWeak.get())
+                            if (auto mssStrong = this->mssWeak.get())
                             {
                                 // the stream is growing so assume it is live
                                 mssStrong.CanSeek(true);
@@ -2704,6 +2710,15 @@ namespace winrt::FFmpegInteropX::implementation
                 }
             }
         }
+    }
+
+    // Static functions passed to FFmpeg
+    int FFmpegMediaSource::FileStreamRead(void* ptr, uint8_t* buf, int bufSize)
+    {
+        FFmpegMediaSource* mss = reinterpret_cast<FFmpegMediaSource*>(ptr);
+
+        // Update the IStream wrapper to account for any ongoing writes to the random access stream.
+        mss->UpdateFileStreamSize();
 
         ULONG bytesRead = 0;
         HRESULT hr = mss->fileStreamData->Read(buf, bufSize, &bytesRead);

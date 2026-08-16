@@ -194,6 +194,7 @@ namespace winrt::FFmpegInteropX::implementation
 
         ///<summary>Gets the duration of the stream. Returns zero, if this is streaming media.</summary>
         TimeSpan Duration();
+        void Duration(TimeSpan const& value);
 
         ///<summary>Gets the current video stream information.</summary>
         FFmpegInteropX::VideoStreamInfo CurrentVideoStream();
@@ -363,6 +364,8 @@ namespace winrt::FFmpegInteropX::implementation
         TimeSpan lastSeek{ 0 };
 
         void OnPositionChanged(MediaPlaybackSession const& sender, IInspectable const& args);
+
+        void UpdateFileStreamSize();
 
         // Static functions passed to FFmpeg
         static int FileStreamRead(void* ptr, uint8_t* buf, int bufSize);
