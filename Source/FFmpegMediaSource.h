@@ -8,6 +8,7 @@
 #include "CodecChecker.h"
 #include "MediaMetadata.h"
 #include "text_encoding_detect.h"
+#include "MpegTsRemuxer.h"
 
 namespace winrt::FFmpegInteropX::implementation
 {
@@ -234,6 +235,14 @@ namespace winrt::FFmpegInteropX::implementation
         ///<summary>Gets the presentation timestamp delay for the given stream. </summary>
         winrt::Windows::Foundation::TimeSpan GetStreamDelay(winrt::FFmpegInteropX::IStreamInfo const& stream);
 
+        /// <summary>Start remuxing the media source to MPEG-TS format and write it to the specified output stream.</summary>
+        void StartRemuxToMpegTsAsync(winrt::Windows::Storage::Streams::IRandomAccessStream outputStream);
+        /// <summary>Stop remuxing the media source to MPEG-TS format. This will stop writing to the output stream and clean up resources.</summary>
+        winrt::Windows::Foundation::IAsyncAction StopRemux();
+        /// <summary>Invoked whenever the duration of the remuxed video stream has changed.</summary>
+        winrt::event_token RemuxDurationChanged(winrt::Windows::Foundation::EventHandler<winrt::Windows::Foundation::TimeSpan> const& handler);
+        void RemuxDurationChanged(winrt::event_token const& token) noexcept;
+
         void Close();
 
         FFmpegMediaSource(winrt::com_ptr<MediaSourceConfig> const& interopConfig, uint64_t windowId, bool useHdr);
@@ -287,6 +296,7 @@ namespace winrt::FFmpegInteropX::implementation
             return currentVideoStream;
         }
 
+    private:
         std::shared_ptr<FFmpegReader> m_pReader;
         AVDictionary* avDict = nullptr;
         AVIOContext* avIOCtx = nullptr;
@@ -300,8 +310,6 @@ namespace winrt::FFmpegInteropX::implementation
         bool isShuttingDown = false;
 
         std::vector<std::shared_ptr<SubtitleProvider>> subtitleStreamProviders;
-
-    private:
 
         winrt::weak_ref<MediaStreamSource> mssWeak = { nullptr };
         winrt::event_token startingRequestedToken{};
@@ -372,6 +380,11 @@ namespace winrt::FFmpegInteropX::implementation
         static int64_t FileStreamSeek(void* ptr, int64_t pos, int whence);
         static int InputStreamRead(void* ptr, uint8_t* buf, int bufSize);
         static int IsShuttingDown(void* ptr);
+
+        bool isRemuxing = false;
+        std::unique_ptr<MpegTsRemuxer> remuxer;
+        winrt::event<Windows::Foundation::EventHandler<Windows::Foundation::TimeSpan>> remuxDurationChangedEvent;
+        winrt::event_token remuxDurationChangedToken{};
     };
 }
 namespace winrt::FFmpegInteropX::factory_implementation

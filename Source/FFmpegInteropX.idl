@@ -609,6 +609,15 @@ namespace FFmpegInteropX
 
         ///<summary>Gets the presentation timestamp delay for the given stream. </summary>
         Windows.Foundation.TimeSpan GetStreamDelay(IStreamInfo stream);
+
+        /// <summary>Start remuxing the media source to MPEG-TS format and write it to the specified output stream.</summary>
+        void StartRemuxToMpegTsAsync(Windows.Storage.Streams.IRandomAccessStream outputStream);
+
+        /// <summary>Stop remuxing the media source to MPEG-TS format. This will stop writing to the output stream and clean up resources.</summary>
+        Windows.Foundation.IAsyncAction StopRemux();
+
+        // Invoked whenever the duration of the remuxed video stream has changed.
+        event Windows.Foundation.EventHandler<Windows.Foundation.TimeSpan /*Duration*/> RemuxDurationChanged;
     };
 
     runtimeclass SubtitleParser : Windows.Foundation.IClosable

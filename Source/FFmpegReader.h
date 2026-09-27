@@ -40,6 +40,9 @@ public:
     void Flush();
     HRESULT Seek(TimeSpan position, TimeSpan& actualPosition, TimeSpan currentPosition, bool allowFastSeek, std::shared_ptr<MediaSampleProvider> videoStream, std::shared_ptr<MediaSampleProvider> audioStream);
 
+    using PacketReadCallback = std::function<void(AVPacket*)>;
+    void SetPacketReadCallback(PacketReadCallback callback);
+
 private:
 
     bool TrySeekBuffered(TimeSpan position, TimeSpan& actualPosition, bool fastSeek, bool isForwardSeek, std::shared_ptr<MediaSampleProvider> videoStream, std::shared_ptr<MediaSampleProvider> audioStream);
@@ -71,4 +74,6 @@ private:
     bool isLastSeekForward = false;
     TimeSpan lastSeekStart { 0 };
     TimeSpan lastSeekActual { 0 };
+
+    PacketReadCallback packetReadCallback;
 };

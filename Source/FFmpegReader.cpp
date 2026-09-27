@@ -543,6 +543,11 @@ int FFmpegReader::ReadPacket()
         {
             DebugMessage(L"Packet read error. Stop reading packets.\n");
             isEof = true;
+
+            if (packetReadCallback)
+            {
+                packetReadCallback(nullptr);
+            }
         }
         av_packet_free(&avPacket);
     }
@@ -566,6 +571,11 @@ int FFmpegReader::ReadPacket()
         }
         else
         {
+            if (packetReadCallback)
+            {
+                packetReadCallback(avPacket);
+            }
+
             auto& provider = sampleProviders->at(avPacket->stream_index);
             if (provider)
             {
@@ -646,3 +656,10 @@ int FFmpegReader::ReadPacketForStream(StreamBuffer* buffer)
 
     return readResult;
 }
+
+void FFmpegReader::SetPacketReadCallback(PacketReadCallback callback)
+{
+    std::lock_guard lock(mutex);
+    packetReadCallback = callback;
+}
+

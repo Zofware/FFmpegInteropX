@@ -214,8 +214,10 @@
     <ClInclude Include="NativeBufferFactory.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PlatformInfo.h" />
+    <ClInclude Include="RandomAccessStreamWrapper.h" />
     <ClInclude Include="ReferenceCue.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="MpegTsRemuxer.h" />
     <ClInclude Include="StreamBuffer.h" />
     <ClInclude Include="StringUtils.h" />
     <ClInclude Include="SubtitleParser.h" />
@@ -251,6 +253,7 @@
     <ClCompile Include="DirectXInteropHelper.cpp" />
     <ClCompile Include="FFmpegInteropLogging.cpp" />
     <ClCompile Include="FFmpegMediaSource.cpp" />
+    <ClCompile Include="FFmpegMediaSource.Remux.cpp" />
     <ClCompile Include="FFmpegReader.cpp" />
     <ClCompile Include="FFmpegUtils.cpp" />
     <ClCompile Include="FilterCommandResult.cpp" />
@@ -270,7 +273,9 @@
     </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="PlatformInfo.cpp" />
+    <ClCompile Include="RandomAccessStreamWrapper.cpp" />
     <ClCompile Include="ReferenceCue.cpp" />
+    <ClCompile Include="MpegTsRemuxer.cpp" />
     <ClCompile Include="SubtitleParser.cpp" />
     <ClCompile Include="SubtitleProvider.cpp" />
     <ClCompile Include="SubtitleProviderSsaAss.cpp" />

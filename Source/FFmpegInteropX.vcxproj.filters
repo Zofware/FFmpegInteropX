@@ -106,6 +106,9 @@
     <None Include="..\Build-VideoEffects.ps1">
       <Filter>Build</Filter>
     </None>
+    <None Include="..\Build-FFmpeg-8.1.2.ps1" />
+    <None Include="..\Build\FFmpegInteropX.UWP.nuspec" />
+    <None Include="..\Release.ps1" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CodecChecker.h" />
@@ -249,6 +252,8 @@
       <Filter>Resources</Filter>
     </ClInclude>
     <ClInclude Include="FilterCommandResult.h" />
+    <ClInclude Include="RandomAccessStreamWrapper.h" />
+    <ClInclude Include="MpegTsRemuxer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CodecChecker.cpp" />
@@ -346,6 +351,9 @@
       <Filter>Helpers</Filter>
     </ClCompile>
     <ClCompile Include="FilterCommandResult.cpp" />
+    <ClCompile Include="RandomAccessStreamWrapper.cpp" />
+    <ClCompile Include="MpegTsRemuxer.cpp" />
+    <ClCompile Include="FFmpegMediaSource.Remux.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="FFmpegInteropX.idl" />
