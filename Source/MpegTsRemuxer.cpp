@@ -10,8 +10,6 @@ extern "C"
 
 #include "RandomAccessStreamWrapper.h"
 
-#include <pplawait.h>
-
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Storage;
 using namespace winrt::Windows::Storage::Streams;
@@ -43,6 +41,8 @@ static std::wstring FormatAvError(const wchar_t* prefix, int errnum)
 
 void MpegTsRemuxer::BeginFile(AVFormatContext* pInputContext, IRandomAccessStream const& destStream)
 {
+    std::lock_guard lock(_mutex);
+
     try
     {
         int err = 0;
@@ -194,6 +194,8 @@ void MpegTsRemuxer::BeginFile(AVFormatContext* pInputContext, IRandomAccessStrea
 
 void MpegTsRemuxer::WritePacket(AVPacket* packet)
 {
+    std::lock_guard lock(_mutex);
+
     if (_isRemuxing)
     {
         auto* clone = (packet != nullptr) ? av_packet_clone(packet) : nullptr;
@@ -202,19 +204,19 @@ void MpegTsRemuxer::WritePacket(AVPacket* packet)
     }
 }
 
-winrt::Windows::Foundation::IAsyncAction MpegTsRemuxer::EndFile()
+void MpegTsRemuxer::EndFile()
 {
+    std::lock_guard lock(_mutex);
+
     if (_isRemuxing)
     {
         _packetQueue.push(nullptr); // Signal end of file
 
         if (!_fileTask.is_done())
         {
-            co_await _fileTask;
+            _fileTask.wait();
         }
     }
-
-    co_return;
 }
 
 // Define the WinRT time base: 1 tick = 100 nanoseconds
@@ -349,6 +351,8 @@ void MpegTsRemuxer::FileTaskFunc(IRandomAccessStream destStream)
 
 void MpegTsRemuxer::Cleanup()
 {
+    std::lock_guard lock(_mutex);
+
     _isRemuxing = false;
 
     while (!_packetQueue.empty())

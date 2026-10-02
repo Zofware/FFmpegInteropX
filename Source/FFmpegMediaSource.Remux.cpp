@@ -10,6 +10,8 @@ namespace winrt::FFmpegInteropX::implementation
 
     void FFmpegMediaSource::StartRemuxToMpegTsAsync(IRandomAccessStream outputStream)
     {
+        std::lock_guard lock(mutex);
+
         try
         {
             if (isRemuxing)
@@ -66,8 +68,10 @@ namespace winrt::FFmpegInteropX::implementation
         }
     }
 
-    winrt::Windows::Foundation::IAsyncAction FFmpegMediaSource::StopRemux()
+    void FFmpegMediaSource::StopRemux()
     {
+        std::lock_guard lock(mutex);
+
         if (isRemuxing && remuxer != nullptr)
         {
             if (m_pReader != nullptr)
@@ -77,8 +81,10 @@ namespace winrt::FFmpegInteropX::implementation
 
             if (remuxer != nullptr)
             {
-                co_await remuxer->EndFile();
+                remuxer->EndFile();
             }
+
+            remuxer.reset();
 
             isRemuxing = false;
         }

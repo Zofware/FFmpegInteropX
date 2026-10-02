@@ -614,7 +614,7 @@ namespace FFmpegInteropX
         void StartRemuxToMpegTsAsync(Windows.Storage.Streams.IRandomAccessStream outputStream);
 
         /// <summary>Stop remuxing the media source to MPEG-TS format. This will stop writing to the output stream and clean up resources.</summary>
-        Windows.Foundation.IAsyncAction StopRemux();
+        void StopRemux();
 
         // Invoked whenever the duration of the remuxed video stream has changed.
         event Windows.Foundation.EventHandler<Windows.Foundation.TimeSpan /*Duration*/> RemuxDurationChanged;

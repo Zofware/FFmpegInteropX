@@ -1,5 +1,4 @@
 #pragma once
-#include <winrt/Windows.Storage.Streams.h>
 #include <concurrent_queue.h>
 #include <ppltasks.h>
 #include "RandomAccessStreamWrapper.h"
@@ -15,7 +14,7 @@ public:
 
     void BeginFile(AVFormatContext* pInputContext, winrt::Windows::Storage::Streams::IRandomAccessStream const& destStream);
     void WritePacket(AVPacket* pPacket);
-    winrt::Windows::Foundation::IAsyncAction EndFile();
+    void EndFile();
 
     winrt::event_token DurationChanged(winrt::Windows::Foundation::EventHandler<winrt::Windows::Foundation::TimeSpan> const& handler);
     void DurationChanged(winrt::event_token const& token) noexcept;
@@ -25,6 +24,8 @@ public:
 private:
     void FileTaskFunc(winrt::Windows::Storage::Streams::IRandomAccessStream destStream);
     void Cleanup();
+
+    std::recursive_mutex _mutex;
 
     bool _isRemuxing = false;
 

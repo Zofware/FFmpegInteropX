@@ -1962,6 +1962,7 @@ namespace winrt::FFmpegInteropX::implementation
     {
         std::lock_guard lock(mutex);
 
+        StopRemux();
 
         if (onMediaSourceClosed)
         {

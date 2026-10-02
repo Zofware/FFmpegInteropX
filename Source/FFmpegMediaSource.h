@@ -238,7 +238,7 @@ namespace winrt::FFmpegInteropX::implementation
         /// <summary>Start remuxing the media source to MPEG-TS format and write it to the specified output stream.</summary>
         void StartRemuxToMpegTsAsync(winrt::Windows::Storage::Streams::IRandomAccessStream outputStream);
         /// <summary>Stop remuxing the media source to MPEG-TS format. This will stop writing to the output stream and clean up resources.</summary>
-        winrt::Windows::Foundation::IAsyncAction StopRemux();
+        void StopRemux();
         /// <summary>Invoked whenever the duration of the remuxed video stream has changed.</summary>
         winrt::event_token RemuxDurationChanged(winrt::Windows::Foundation::EventHandler<winrt::Windows::Foundation::TimeSpan> const& handler);
         void RemuxDurationChanged(winrt::event_token const& token) noexcept;
